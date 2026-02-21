@@ -28,8 +28,10 @@
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLDIR" Name="win-acme">
           <Component Id="EnvAndAcl" Guid="*">
-            <CreateFolder/>
-            <util:PermissionEx User="LOCAL SERVICE" GenericAll="yes" />
+            <CreateFolder>
+              <util:PermissionEx User="LOCAL SERVICE" GenericAll="yes" />
+            </CreateFolder>
+
             <Environment Id="AddToSystemPath"
                          Name="PATH"
                          Value="[INSTALLDIR]"
@@ -37,6 +39,9 @@
                          Part="last"
                          System="yes"
                          Permanent="no" />
+
+            <!-- KeyPath without registry -->
+            <CreateFolder Id="KeyPathFolder" />
           </Component>
         </Directory>
       </Directory>
