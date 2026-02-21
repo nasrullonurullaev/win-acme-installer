@@ -14,9 +14,7 @@
              InstallScope="perMachine" />
 
     <Property Id="ALLUSERS" Value="1" />
-
     <MajorUpgrade DowngradeErrorMessage="A newer version is already installed." />
-
     <MediaTemplate />
 
     <Feature Id="MainFeature" Title="win-acme" Level="1">
@@ -40,8 +38,10 @@
                          System="yes"
                          Permanent="no" />
 
-            <!-- KeyPath without registry -->
-            <CreateFolder Id="KeyPathFolder" />
+            <File Id="InstallMarker"
+                  Name="installed.marker"
+                  Source="$(var.PayloadDir)\installed.marker"
+                  KeyPath="yes" />
           </Component>
         </Directory>
       </Directory>
