@@ -5,7 +5,7 @@
   <Product Id="*"
            Name="win-acme"
            Language="1033"
-           Version="2.2.9.1701"
+           Version="$(var.ProductVersion)"
            Manufacturer="Ascensio System SIA"
            UpgradeCode="9E7A0E51-3F2D-4F77-A1E4-2C0C2B41A9F3">
 
@@ -24,23 +24,12 @@
       <ComponentRef Id="EnvAndAcl"/>
     </Feature>
 
-    <!-- Directory tree -->
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLDIR" Name="win-acme">
-
-          <!-- Компонент без реестра -->
           <Component Id="EnvAndAcl" Guid="*">
-
-            <!-- Создание папки + KeyPath -->
             <CreateFolder/>
-
-            <!-- Full Control для LOCAL SERVICE -->
-            <util:PermissionEx
-                User="LOCAL SERVICE"
-                GenericAll="yes" />
-
-            <!-- Добавление INSTALLDIR в системный PATH -->
+            <util:PermissionEx User="LOCAL SERVICE" GenericAll="yes" />
             <Environment Id="AddToSystemPath"
                          Name="PATH"
                          Value="[INSTALLDIR]"
@@ -48,9 +37,7 @@
                          Part="last"
                          System="yes"
                          Permanent="no" />
-
           </Component>
-
         </Directory>
       </Directory>
     </Directory>
