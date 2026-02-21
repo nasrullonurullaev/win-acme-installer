@@ -1,0 +1,80 @@
+name: Release win-acme MSI (WiX)
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: version
+        shell: powershell
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart("v")
+          if ($version -match "^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+") {
+            $version = $Matches[0]
+          }
+          echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Install WiX Toolset
+        run: choco install wixtoolset -y
+
+      - name: Download win-acme zip
+        shell: powershell
+        run: |
+          $url = "https://github.com/win-acme/win-acme/releases/download/v2.2.9.1701/win-acme.v2.2.9.1701.x64.trimmed.zip"
+          mkdir build\in
+          Invoke-WebRequest $url -OutFile build\in\win-acme.zip
+
+      - name: Extract zip
+        shell: powershell
+        run: |
+          mkdir build\payload
+          Expand-Archive build\in\win-acme.zip -DestinationPath build\payload -Force
+
+      - name: Harvest files
+        shell: powershell
+        run: |
+          mkdir build\wix
+          heat dir build\payload `
+            -cg WinAcmeFiles `
+            -dr INSTALLDIR `
+            -gg -g1 `
+            -scom -sreg -sfrag `
+            -var var.PayloadDir `
+            -out build\wix\WinAcmeFiles.wxs
+
+      - name: Build MSI
+        shell: powershell
+        run: |
+          mkdir build\out
+
+          candle.exe `
+            -dProductVersion="${{ steps.version.outputs.VERSION }}" `
+            -dPayloadDir="build\payload" `
+            -ext WixUtilExtension `
+            wix\Product.wxs build\wix\WinAcmeFiles.wxs
+
+          light.exe `
+            -ext WixUtilExtension `
+            -out build\out\win-acme-${{ steps.version.outputs.VERSION }}.msi `
+            Product.wixobj WinAcmeFiles.wixobj
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/out/win-acme-${{ steps.version.outputs.VERSION }}.msi
+          name: win-acme ${{ steps.version.outputs.VERSION }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
