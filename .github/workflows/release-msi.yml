@@ -42,17 +42,6 @@ jobs:
           dotnet tool install --global wix --version 4.*
           wix --version
 
-      - name: Harvest payload
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force installer | Out-Null
-          wix harvest dir payload `
-            -cg WinAcmeComponents `
-            -dr INSTALLFOLDER `
-            -var var.SourceDir `
-            -o installer\harvest.wxs `
-            -srd -scom -sreg
-
       - name: Build MSI
         shell: pwsh
         run: |
@@ -63,7 +52,7 @@ jobs:
             -d Version=$ver `
             -d SourceDir=payload `
             -o build\win-acme-$ver-x64.msi `
-            installer\main.wxs installer\harvest.wxs
+            installer\main.wxs
 
       - uses: actions/upload-artifact@v4
         with:
