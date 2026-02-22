@@ -32,6 +32,15 @@
         System="yes" />
     </Component>
 
+    <ComponentGroup Id="WinAcmeComponents" Directory="INSTALLFOLDER">
+      <Files Include="$(var.SourceDir)\public_suffix_list.dat" />
+      <Files Include="$(var.SourceDir)\settings_default.json" />
+      <Files Include="$(var.SourceDir)\version.txt" />
+      <Files Include="$(var.SourceDir)\wacs.exe" />
+      <Files Include="$(var.SourceDir)\Web_Config.xml" />
+      <Files Include="$(var.SourceDir)\Scripts\**" />
+    </ComponentGroup>
+
     <Feature Id="Main" Level="1">
       <ComponentRef Id="CreateInstallFolder" />
       <ComponentRef Id="AddToPath" />
