@@ -1,14 +1,14 @@
-name: build-win-acme-msi
+name: build-msi
 
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
-      version:
-        description: "win-acme version (for example 2.2.9.1701)"
-        required: true      
+      ver:
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -16,46 +16,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Version from tag
+      - uses: actions/setup-dotnet@v4
+
+      - name: download
         shell: pwsh
         run: |
-          if ("${env:GITHUB_EVENT_NAME}" -eq "workflow_dispatch") {
-            $ver = "${{ github.event.inputs.version }}"
-          }
-          else {
-            $ver = "${env:GITHUB_REF_NAME}" -replace '^v',''
-          }
-          "VERSION=$ver" | Out-File -FilePath $env:GITHUB_ENV -Append
+          $ver = "${{ inputs.ver }}"
+          Invoke-WebRequest "https://github.com/win-acme/win-acme/releases/download/v$ver/win-acme.v$ver.x64.trimmed.zip" -OutFile win-acme.zip
 
-      - name: Download + extract
+      - name: extract
         shell: pwsh
         run: |
-          $ver = "${env:VERSION}"
-          $url = "https://github.com/win-acme/win-acme/releases/download/v$ver/win-acme.v$ver.x64.trimmed.zip"
-          New-Item -ItemType Directory -Force build,payload | Out-Null
-          Invoke-WebRequest $url -OutFile build\win-acme.zip
-          Expand-Archive build\win-acme.zip payload -Force
+          Expand-Archive win-acme.zip src -Force
+          Copy-Item src\* . -Recurse -Force
 
-      - name: Install WiX v4
+      - name: wix
         shell: pwsh
         run: |
           dotnet tool install --global wix
-          wix extension add WixToolset.Util.wixext
-          wix --version
+          wix build main.wxs -arch x64 -dProductVersion=${{ inputs.ver }} -o "Win-acme-${{ inputs.ver }}.msi"
 
-      - name: Build MSI
-        shell: pwsh
-        run: |
-          $ver = "${env:VERSION}"
-          wix build `
-            -arch x64 `
-            -ext WixToolset.Util.wixext `
-            -d Version=$ver `
-            -d SourceDir=payload `
-            -o build\win-acme-$ver-x64.msi `
-            installer\main.wxs
-
-      - uses: actions/upload-artifact@v4
+      - name: release
+        uses: softprops/action-gh-release@v2
         with:
-          name: win-acme-msi
-          path: build/*.msi
+          tag_name: v${{ inputs.ver }}
+          files: Win-acme-${{ inputs.ver }}.msi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
