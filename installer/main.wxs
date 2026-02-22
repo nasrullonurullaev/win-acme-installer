@@ -23,7 +23,7 @@
       <util:PermissionEx WellKnownSid="LocalServiceSid" GenericAll="yes" />
     </Component>
 
-    <Component Id="AddToPath" Guid="*">
+    <Component Id="AddToPath" Guid="*" Directory="INSTALLFOLDER">
       <util:Environment
         Name="PATH"
         Value="[INSTALLFOLDER]"
