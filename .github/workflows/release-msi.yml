@@ -34,7 +34,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --global wix
-          wix build main.wxs -arch x64 -dProductVersion=${{ inputs.ver }} -o "Win-acme-${{ inputs.ver }}.msi"
+          wix build main.wxs -arch x64 -d ProductVersion=${{ inputs.ver }} -o "Win-acme-${{ inputs.ver }}.msi"
 
       - name: release
         uses: softprops/action-gh-release@v2
