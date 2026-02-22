@@ -40,6 +40,7 @@ jobs:
         shell: pwsh
         run: |
           dotnet tool install --global wix --version 4.*
+          wix extension add WixToolset.Util.wixext
           wix --version
 
       - name: Build MSI
