@@ -39,7 +39,7 @@ jobs:
       - name: Install WiX v4
         shell: pwsh
         run: |
-          dotnet tool install --global wix --version 4.*
+          dotnet tool install --global wix
           wix extension add WixToolset.Util.wixext
           wix --version
 
