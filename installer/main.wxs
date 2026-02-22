@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Package
+    Name="win-acme"
+    Manufacturer="Ascensio System SIA"
+    Version="$(var.Version)"
+    UpgradeCode="{2F5D6A3A-9B1C-4E6B-9D5E-1A6E7F3D0B11}"
+    InstallScope="perMachine"
+    Compressed="yes">
+
+    <MajorUpgrade />
+
+    <MediaTemplate />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="win-acme" />
+    </StandardDirectory>
+
+    <Component Id="CreateInstallFolder" Guid="*" Directory="INSTALLFOLDER">
+      <CreateFolder />
+      <util:PermissionEx WellKnownSid="LocalServiceSid" GenericAll="yes" />
+    </Component>
+
+    <Component Id="AddToPath" Guid="*">
+      <util:Environment
+        Name="PATH"
+        Value="[INSTALLFOLDER]"
+        Action="set"
+        Part="last"
+        System="yes" />
+    </Component>
+
+    <Feature Id="Main" Level="1">
+      <ComponentRef Id="CreateInstallFolder" />
+      <ComponentRef Id="AddToPath" />
+      <ComponentGroupRef Id="WinAcmeComponents" />
+    </Feature>
+
+  </Package>
+</Wix>
