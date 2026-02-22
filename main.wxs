@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="Win-Acme"
+           Manufacturer="Ascensio System SIA"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="2F5D6A3A-9B1C-4E6B-9D5E-1A6E7F3D0B11"
+           Compressed="true"
+           InstallerVersion="200">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate EmbedCab="yes" />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="!(bind.Property.ProductName)">
+        <Directory Id="SCRIPTSFOLDER" Name="Scripts" />
+      </Directory>
+    </StandardDirectory>
+
+    <Component Id="AddToPath"
+               Directory="INSTALLFOLDER"
+               Guid="E2F8B2F2-7B2B-4B9A-9A7E-6F0E3E2B7B7C">
+      <Environment
+        Name="PATH"
+        Value="[INSTALLFOLDER]"
+        Action="set"
+        Part="last"
+        System="yes" />
+      <RegistryValue
+        Root="HKLM"
+        Key="Software\Ascensio System SIA\Win-Acme"
+        Name="AddToPath"
+        Type="integer"
+        Value="1"
+        KeyPath="yes" />
+    </Component>
+
+    <ComponentGroup Id="WinAcmeMainComponents" Directory="INSTALLFOLDER">
+      <Files Include="public_suffix_list.dat" />
+      <Files Include="settings_default.json" />
+      <Files Include="version.txt" />
+      <Files Include="wacs.exe" />
+      <Files Include="Web_Config.xml" />
+    </ComponentGroup>
+
+    <ComponentGroup Id="WinAcmeScriptComponents" Directory="SCRIPTSFOLDER">
+      <Files Include="Scripts\**" />
+    </ComponentGroup>
+
+    <Feature Id="Main">
+      <ComponentRef Id="AddToPath"/>
+      <ComponentGroupRef Id="WinAcmeMainComponents"/>
+      <ComponentGroupRef Id="WinAcmeScriptComponents"/>
+    </Feature>
+
+  </Package>
+</Wix>
