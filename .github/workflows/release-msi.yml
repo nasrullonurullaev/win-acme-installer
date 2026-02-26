@@ -5,6 +5,7 @@ on:
     inputs:
       ver:
         required: true
+        default: "2.2.9.1701"
         type: string
 
 permissions:
