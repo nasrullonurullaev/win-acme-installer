@@ -41,7 +41,7 @@ jobs:
       - name: Build MSI
         shell: pwsh
         run: |
-          dotnet tool install --global wix --version 4.*
+          dotnet tool install --global wix
           wix build main.wxs `
             -arch x64 `
             -d ProductVersion="$env:VERSION" `
