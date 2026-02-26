@@ -1,5 +1,3 @@
----
-
 # win-acme MSI Installer
 
 MSI package for **win-acme (WACS)**.
