@@ -1,12 +1,9 @@
-name: build-msi
+name: Build Win-Acme Installer
 
 on:
-  workflow_dispatch:
-    inputs:
-      ver:
-        required: true
-        default: "2.2.9.1701"
-        type: string
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: write
@@ -14,32 +11,46 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-dotnet@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
 
-      - name: download
+      - name: Set version from tag
         shell: pwsh
         run: |
-          $ver = "${{ inputs.ver }}"
-          Invoke-WebRequest "https://github.com/win-acme/win-acme/releases/download/v$ver/win-acme.v$ver.x64.trimmed.zip" -OutFile win-acme.zip
+          $ver = "${{ github.ref_name }}" -replace '^v',''
+          echo "VERSION=$ver" >> $env:GITHUB_ENV
 
-      - name: extract
+      - name: Download win-acme
+        shell: pwsh
+        run: |
+          Invoke-WebRequest `
+            "https://github.com/win-acme/win-acme/releases/download/v$env:VERSION/win-acme.v$env:VERSION.x64.trimmed.zip" `
+            -OutFile win-acme.zip
+
+      - name: Extract archive
         shell: pwsh
         run: |
           Expand-Archive win-acme.zip src -Force
           Copy-Item src\* . -Recurse -Force
 
-      - name: wix
+      - name: Build MSI
         shell: pwsh
         run: |
-          dotnet tool install --global wix
-          wix build main.wxs -arch x64 -d ProductVersion="${{ inputs.ver }}" -o "Win-acme-${{ inputs.ver }}.msi"
-      - name: release
+          dotnet tool install --global wix --version 4.*
+          wix build main.wxs `
+            -arch x64 `
+            -d ProductVersion="$env:VERSION" `
+            -o "Win-Acme-$env:VERSION.msi"
+
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ inputs.ver }}
-          files: Win-acme-${{ inputs.ver }}.msi
+          tag_name: v${{ env.VERSION }}
+          files: Win-Acme-${{ env.VERSION }}.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
