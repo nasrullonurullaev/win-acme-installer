@@ -51,6 +51,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.VERSION }}
-          files: Win-Acme-${{ env.VERSION }}.msi
+          files: Win-acme-${{ env.VERSION }}.msi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
